@@ -54,7 +54,7 @@
               <button class="action-row" (click)="activeView = 'profile'"><span class="action-icon purple">P</span><span><b>View my details</b><small>Review your account information</small></span><span class="arrow">&gt;</span></button>
               @if (currentUser.role === 'admin') { <button class="action-row" (click)="activeView = 'users'"><span class="action-icon blue">U</span><span><b>Manage users</b><small>Add and manage workspace accounts</small></span><span class="arrow">&gt;</span></button> }
             </div>
-            <div class="panel welcome-panel"><div class="welcome-symbol">*</div></div><h3>Your workspace, at a glance</h3><p>Manage account information and keep your team directory up to date from one place.</p><div class="mini-line"><span>Workspace status</span><b><span class="status-dot"></span> Healthy</b></div></div>
+            <div class="panel welcome-panel"><div class="welcome-symbol">*</div><h3>Your workspace, at a glance</h3><p>Manage account information and keep your team directory up to date from one place.</p><div class="mini-line"><span>Workspace status</span><b><span class="status-dot"></span> Healthy</b></div></div>
           </div>
         </section>
       }
@@ -87,6 +87,7 @@
     </main>
   </div>
 }
+
 
 
 
