@@ -1,0 +1,91 @@
+@'
+@if (!currentUser) {
+  <div class="page">
+    <div class="card">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div><h1>MPloyChek</h1><p>Verification Platform</p></div>
+      </div>
+      <div class="welcome">
+        <h2>Welcome back</h2>
+        <p>Sign in to continue to your dashboard.</p>
+      </div>
+      <form (submit)="$event.preventDefault(); login()">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" [(ngModel)]="email" placeholder="Enter your email" required />
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" [(ngModel)]="password" placeholder="Enter your password" required />
+        @if (errorMessage) { <div class="error">{{ errorMessage }}</div> }
+        <button type="submit" [disabled]="loading">{{ loading ? 'Signing in...' : 'Sign In' }}</button>
+      </form>
+      <div class="demo">
+        <p>Demo credentials</p>
+        <span>Admin: admin@mploychek.com / admin123</span>
+        <span>User: user@mploychek.com / user123</span>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="side-brand"><div class="logo">M</div><div><b>MPloyChek</b><small>Verification Platform</small></div></div>
+      <p class="nav-label">WORKSPACE</p>
+      <button class="nav-item" [class.selected]="activeView === 'dashboard'" (click)="activeView = 'dashboard'">▦ &nbsp; Dashboard</button>
+      <button class="nav-item" [class.selected]="activeView === 'profile'" (click)="activeView = 'profile'">♙ &nbsp; My Details</button>
+      @if (currentUser.role === 'admin') {
+        <button class="nav-item" [class.selected]="activeView === 'users'" (click)="activeView = 'users'">♧ &nbsp; User Management</button>
+      }
+      <div class="side-bottom"><div class="avatar">{{ currentUser.name.charAt(0) }}</div><div class="user-meta"><b>{{ currentUser.name }}</b><small>{{ currentUser.role === 'admin' ? 'Administrator' : 'General User' }}</small></div><button class="logout" (click)="logout()">↗</button></div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div><span class="crumb">Workspace / </span><b>{{ activeView === 'users' ? 'User Management' : activeView === 'profile' ? 'My Details' : 'Dashboard' }}</b></div><div class="top-right"><span class="status-dot"></span> System operational <div class="top-avatar">{{ currentUser.name.charAt(0) }}</div></div></header>
+
+      @if (activeView === 'dashboard') {
+        <section class="content">
+          <div class="page-heading"><div><p class="eyebrow">OVERVIEW</p><h1>Good to see you, {{ currentUser.name.split(' ')[0] }} 👋</h1><p>Here's what's happening across your workspace today.</p></div><span class="role-chip">{{ currentUser.role === 'admin' ? 'ADMINISTRATOR' : 'GENERAL USER' }}</span></div>
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-icon purple">♙</div><p>Total Users</p><h2>{{ users.length }}</h2><small>Registered accounts</small></div>
+            <div class="stat-card"><div class="stat-icon green">✓</div><p>Active Users</p><h2>{{ users.filter(u => u.status === 'Active').length }}</h2><small>Currently active</small></div>
+            <div class="stat-card"><div class="stat-icon amber">◷</div><p>Inactive Users</p><h2>{{ users.filter(u => u.status === 'Inactive').length }}</h2><small>Need attention</small></div>
+            <div class="stat-card"><div class="stat-icon blue">♧</div><p>Your Access</p><h2 class="access-value">{{ currentUser.role === 'admin' ? 'Admin' : 'Standard' }}</h2><small>Role-based permissions</small></div>
+          </div>
+          <div class="section-grid">
+            <div class="panel"><div class="panel-heading"><div><h3>Quick actions</h3><p>Jump straight into your workspace</p></div></div>
+              <button class="action-row" (click)="activeView = 'profile'"><span class="action-icon purple">♙</span><span><b>View my details</b><small>Review your account information</small></span><span class="arrow">→</span></button>
+              @if (currentUser.role === 'admin') { <button class="action-row" (click)="activeView = 'users'"><span class="action-icon blue">♧</span><span><b>Manage users</b><small>Add and manage workspace accounts</small></span><span class="arrow">→</span></button> }
+            </div>
+            <div class="panel welcome-panel"><div class="welcome-symbol">✦</div><h3>Your workspace, at a glance</h3><p>Manage account information and keep your team directory up to date from one place.</p><div class="mini-line"><span>Workspace status</span><b><span class="status-dot"></span> Healthy</b></div></div>
+          </div>
+        </section>
+      }
+
+      @if (activeView === 'profile') {
+        <section class="content">
+          <div class="page-heading"><div><p class="eyebrow">ACCOUNT</p><h1>My Details</h1><p>Your account profile and access information.</p></div></div>
+          <div class="panel profile-panel"><div class="profile-hero"><div class="profile-avatar">{{ currentUser.name.charAt(0) }}</div><div><h2>{{ currentUser.name }}</h2><p>{{ currentUser.email }}</p><span class="active-badge">● Active account</span></div></div>
+            <div class="detail-grid"><div class="detail-item"><label>FULL NAME</label><p>{{ currentUser.name }}</p></div><div class="detail-item"><label>EMAIL ADDRESS</label><p>{{ currentUser.email }}</p></div><div class="detail-item"><label>ACCESS ROLE</label><p>{{ currentUser.role === 'admin' ? 'Administrator' : 'General User' }}</p></div><div class="detail-item"><label>ACCOUNT STATUS</label><p><span class="active-badge">Active</span></p></div></div>
+          </div>
+        </section>
+      }
+
+      @if (activeView === 'users' && currentUser.role === 'admin') {
+        <section class="content">
+          <div class="page-heading"><div><p class="eyebrow">ADMINISTRATION</p><h1>User Management</h1><p>View, search and manage workspace users.</p></div><button class="primary-btn" (click)="showAddUser = !showAddUser">＋ Add user</button></div>
+          @if (showAddUser) {
+            <div class="panel add-panel"><h3>Add a new user</h3><div class="add-form"><div><label>Full name</label><input [(ngModel)]="newName" name="newName" placeholder="e.g. Ananya Rao" /></div><div><label>Email address</label><input [(ngModel)]="newEmail" name="newEmail" type="email" placeholder="name@example.com" /></div><div><label>Department</label><select [(ngModel)]="newDepartment" name="newDepartment"><option>Engineering</option><option>Human Resources</option><option>Finance</option><option>Administration</option></select></div><div class="form-actions"><button class="secondary-btn" (click)="showAddUser = false">Cancel</button><button class="primary-btn" (click)="addUser()">Create user</button></div></div></div>
+          }
+          <div class="panel table-panel"><div class="table-toolbar"><div><h3>All users <span class="count-chip">{{ filteredUsers.length }}</span></h3><p>Workspace account directory</p></div><input class="search-input" [(ngModel)]="searchTerm" name="searchTerm" placeholder="⌕  Search users..." /></div>
+            <div class="table-wrap"><table><thead><tr><th>USER</th><th>DEPARTMENT</th><th>ROLE</th><th>STATUS</th><th>ACTION</th></tr></thead><tbody>
+              @for (user of filteredUsers; track user.id) {
+                <tr><td><div class="table-user"><div class="table-avatar">{{ user.name.charAt(0) }}</div><div><b>{{ user.name }}</b><small>{{ user.email }}</small></div></div></td><td>{{ user.department }}</td><td><span class="role-tag" [class.admin-tag]="user.role === 'admin'">{{ user.role === 'admin' ? 'Admin' : 'General User' }}</span></td><td><span class="status-tag" [class.inactive-tag]="user.status === 'Inactive'"><span class="status-dot"></span>{{ user.status }}</span></td><td><button class="text-btn" (click)="toggleStatus(user)" [disabled]="user.role === 'admin'">{{ user.status === 'Active' ? 'Deactivate' : 'Activate' }}</button></td></tr>
+              } @empty { <tr><td colspan="5" class="empty-state">No users match your search.</td></tr> }
+            </tbody></table></div>
+            <div class="table-footer">Showing {{ filteredUsers.length }} of {{ users.length }} users <span>Changes apply to this demo session.</span></div>
+          </div>
+        </section>
+      }
+    </main>
+  </div>
+}
+'@ | Set-Content .\src\app\app.html
